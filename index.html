@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Socket.IO</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        color: #333;
+      }
+      #wrap {
+        max-width: 90%;
+        width: fit-content;
+        margin: 25px auto;
+      }
+      li {
+        list-style: none;
+      }
+      form {
+        display: flex;
+        flex-direction: row;
+        border: 1px solid grey;
+        border-radius: 15px;
+        min-width: 300px;
+      }
+      input {
+        padding: 5px 0 5px 15px;
+        flex-grow: 2;
+        border: none;
+        border-radius: 15px 0 0 15px;
+        font-size: larger;
+      }
+      input:focus {
+        outline: none;
+      }
+      form:focus-within {
+        outline: 1px solid gray;
+      }
+      button {
+        border: none;
+        background-color: white;
+        border-radius: 0 15px 15px 0;
+        padding: 5px 15px 5px 5px;
+        font-size: larger;
+      }
+      h2 {
+        text-align: center;
+        margin-block-end: 0.5em;
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        gap: 6px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      li {
+        font-size: larger;
+        display: flex;
+        gap: 6px;
+        cursor: pointer;
+        margin: 4px;
+      }
+      .tag {
+        border: 1px solid black;
+        border-radius: 15px;
+        padding: 0 10px;
+      }
+      .name {
+        flex-grow: 1;
+      }
+      .check {
+        fill: none;
+        stroke: #4a7fe1;
+        stroke-width: 4;
+        stroke-dasharray: 23;
+        stroke-dashoffset: 23;
+        animation: draw 500ms linear forwards;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .circle {
+        border: 1px solid #4a7fe1;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+      }
+      #error {
+        text-align: center;
+        color: red;
+        font-size: large;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Hinzufügen" />
+        <button>+</button>
+      </form>
+      <p id="error"></p>
+      <h2>Einkaufen</h2>
+      <ul id="items"></ul>
+      <h2>Vorrat</h2>
+      <ul id="items2"></ul>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const list = document.getElementById("items");
+      const list2 = document.getElementById("items2");
+
+      // Add new item
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit("item", input.value);
+          input.value = "";
+        }
+      });
+      // Receive
+      socket.on("item", (id, name, tag) => {
+        const item = document.createElement("li");
+        item.setAttribute("id", id);
+        item.addEventListener("click", shiftEvent);
+        item.innerHTML = `<div class="circle">
+            <svg viewBox="0 0 24 24">
+            <path d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
+            </svg></div><span class="name">${name}</span>
+            <span class="tag">${tag}</span>`;
+        list.prepend(item);
+      });
+      socket.on("shift", (id, name, tag) => {
+        item = document.createElement("li");
+        item.setAttribute("id", id);
+        item.innerHTML = `<div class="circle">
+            <svg viewBox="0 0 24 24">
+            <path d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
+            </svg></div><span class="name">${name}</span>
+            <span class="tag">${tag}</span>`;
+        item.addEventListener("click", deleteEvent);
+        list2.prepend(item);
+      });
+
+      function shiftEvent(e) {
+        e.preventDefault();
+        e.currentTarget.removeEventListener("click", shiftEvent);
+        let path = document.querySelector(
+          `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
+        );
+        path.addEventListener("animationend", (e) => {
+          e.preventDefault();
+          var target = e.currentTarget;
+          setTimeout(() => {
+            path.classList.remove("check");
+            let item = list.removeChild(
+              target.parentElement.parentElement.parentElement
+            );
+            item.addEventListener("click", deleteEvent);
+            list2.prepend(item);
+          }, 200);
+        });
+        path.classList.add("check");
+        socket.emit("shift", e.currentTarget.id);
+      }
+
+      function deleteEvent(e) {
+        e.preventDefault();
+        e.currentTarget.removeEventListener("click", deleteEvent);
+        let path = document.querySelector(
+          `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
+        );
+        path.addEventListener("animationend", (e) => {
+          e.preventDefault();
+          var target = e.currentTarget;
+          setTimeout(() => {
+            path.classList.remove("check");
+            let item = list2.removeChild(
+              target.parentElement.parentElement.parentElement
+            );
+          }, 200);
+        });
+        path.classList.add("check");
+        socket.emit("delete", e.currentTarget.id);
+      }
+
+      socket.on("error", (e) => {
+        document.getElementById("error").textContent = e;
+        setTimeout(() => {
+          document.getElementById("error").textContent = "";
+        }, 5000);
+      });
+    </script>
+  </body>
+</html>
