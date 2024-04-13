@@ -323,7 +323,7 @@
       socket.on("fd", (id) => {
         let item = document.getElementById(id);
         let tag = item.querySelector(".tag").textContent;
-        ocument.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
         item.removeEventListener("click", deleteEvent);
       });
 
