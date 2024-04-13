@@ -2,11 +2,10 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Socket.IO</title>
+    <title>Einkauf</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f0f0f0;
         color: #333;
       }
       #wrap {
@@ -15,6 +14,17 @@
       }
       li {
         list-style: none;
+      }
+      li > ul > li {
+        font-size: larger;
+        display: flex;
+        gap: 6px;
+        cursor: pointer;
+        margin: 4px;
+        align-items: center;
+      }
+      li > ul > li:first-child {
+        margin-top: 10px;
       }
       form {
         display: flex;
@@ -50,17 +60,9 @@
       ul {
         margin: 0;
         padding: 0;
-        gap: 6px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-      }
-      li {
-        font-size: larger;
-        display: flex;
-        gap: 6px;
-        cursor: pointer;
-        margin: 4px;
       }
       .tag {
         border: 1px solid black;
@@ -76,7 +78,7 @@
         stroke-width: 4;
         stroke-dasharray: 23;
         stroke-dashoffset: 23;
-        animation: draw 500ms linear forwards;
+        animation: draw 200ms linear forwards;
         stroke-linecap: round;
         stroke-linejoin: round;
       }
@@ -86,10 +88,15 @@
         }
       }
       .circle {
-        border: 1px solid #4a7fe1;
+        border: 2px solid #4a7fe1;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
+      }
+      svg {
+        width: 24px;
+        height: 24px;
+        transform: translateY(-4px);
       }
       #error {
         text-align: center;
@@ -106,9 +113,119 @@
       </form>
       <p id="error"></p>
       <h2>Einkaufen</h2>
-      <ul id="items"></ul>
+      <ul>
+        <li>
+          <ul id="obst"></ul>
+        </li>
+        <li>
+          <ul id="gemüse"></ul>
+        </li>
+        <li>
+          <ul id="backen"></ul>
+        </li>
+        <li>
+          <ul id="konserven"></ul>
+        </li>
+        <li>
+          <ul id="aufstrich"></ul>
+        </li>
+        <li>
+          <ul id="backware"></ul>
+        </li>
+        <li>
+          <ul id="cerealien"></ul>
+        </li>
+        <li>
+          <ul id="teigware"></ul>
+        </li>
+        <li>
+          <ul id="soße"></ul>
+        </li>
+        <li>
+          <ul id="getränke"></ul>
+        </li>
+        <li>
+          <ul id="fleischersatz"></ul>
+        </li>
+        <li>
+          <ul id="milchprodukte"></ul>
+        </li>
+        <li>
+          <ul id="pflegeprodukte"></ul>
+        </li>
+        <li>
+          <ul id="tiefkühl"></ul>
+        </li>
+        <li>
+          <ul id="haushalt"></ul>
+        </li>
+        <li>
+          <ul id="snacks"></ul>
+        </li>
+        <li>
+          <ul id="fertigprodukte"></ul>
+        </li>
+        <li>
+          <ul id="sonstiges"></ul>
+        </li>
+      </ul>
       <h2>Vorrat</h2>
-      <ul id="items2"></ul>
+      <ul>
+        <li>
+          <ul id="v-obst"></ul>
+        </li>
+        <li>
+          <ul id="v-gemüse"></ul>
+        </li>
+        <li>
+          <ul id="v-backen"></ul>
+        </li>
+        <li>
+          <ul id="v-konserven"></ul>
+        </li>
+        <li>
+          <ul id="v-aufstrich"></ul>
+        </li>
+        <li>
+          <ul id="v-backware"></ul>
+        </li>
+        <li>
+          <ul id="v-cerealien"></ul>
+        </li>
+        <li>
+          <ul id="v-teigware"></ul>
+        </li>
+        <li>
+          <ul id="v-soße"></ul>
+        </li>
+        <li>
+          <ul id="v-getränke"></ul>
+        </li>
+        <li>
+          <ul id="v-fleischersatz"></ul>
+        </li>
+        <li>
+          <ul id="v-milchprodukte"></ul>
+        </li>
+        <li>
+          <ul id="v-pflegeprodukte"></ul>
+        </li>
+        <li>
+          <ul id="v-tiefkühl"></ul>
+        </li>
+        <li>
+          <ul id="v-haushalt"></ul>
+        </li>
+        <li>
+          <ul id="v-snacks"></ul>
+        </li>
+        <li>
+          <ul id="v-fertigprodukte"></ul>
+        </li>
+        <li>
+          <ul id="v-sonstiges"></ul>
+        </li>
+      </ul>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -117,8 +234,6 @@
 
       const form = document.getElementById("form");
       const input = document.getElementById("input");
-      const list = document.getElementById("items");
-      const list2 = document.getElementById("items2");
 
       // Add new item
       form.addEventListener("submit", (e) => {
@@ -130,6 +245,7 @@
       });
       // Receive
       socket.on("item", (id, name, tag) => {
+        console.log(tag);
         const item = document.createElement("li");
         item.setAttribute("id", id);
         item.addEventListener("click", shiftEvent);
@@ -138,7 +254,7 @@
             <path d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
             </svg></div><span class="name">${name}</span>
             <span class="tag">${tag}</span>`;
-        list.prepend(item);
+        document.getElementById(tag.toLowerCase()).prepend(item);
       });
       socket.on("shift", (id, name, tag) => {
         item = document.createElement("li");
@@ -149,7 +265,7 @@
             </svg></div><span class="name">${name}</span>
             <span class="tag">${tag}</span>`;
         item.addEventListener("click", deleteEvent);
-        list2.prepend(item);
+        document.getElementById("v-" + tag.toLowerCase()).prepend(item);
       });
 
       function shiftEvent(e) {
@@ -158,21 +274,31 @@
         let path = document.querySelector(
           `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
         );
-        path.addEventListener("animationend", (e) => {
+        let tag = e.currentTarget.querySelector(".tag").textContent;
+        path.addEventListener("animationend", function handler(e) {
           e.preventDefault();
           var target = e.currentTarget;
+          this.removeEventListener("animationend", handler);
           setTimeout(() => {
             path.classList.remove("check");
-            let item = list.removeChild(
-              target.parentElement.parentElement.parentElement
-            );
+            let item = document
+              .getElementById(tag.toLowerCase())
+              .removeChild(target.parentElement.parentElement.parentElement);
             item.addEventListener("click", deleteEvent);
-            list2.prepend(item);
+            document.getElementById("v-" + tag.toLowerCase()).prepend(item);
           }, 200);
         });
         path.classList.add("check");
         socket.emit("shift", e.currentTarget.id);
       }
+      socket.on("fs", (id) => {
+        let item = document.getElementById(id);
+        let tag = item.querySelector(".tag").textContent;
+        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        item.removeEventListener("click", shiftEvent);
+        item.addEventListener("click", deleteEvent);
+        document.getElementById("v-" + tag.toLowerCase()).prepend(item);
+      });
 
       function deleteEvent(e) {
         e.preventDefault();
@@ -180,19 +306,26 @@
         let path = document.querySelector(
           `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
         );
+        let tag = e.currentTarget.querySelector(".tag").textContent;
         path.addEventListener("animationend", (e) => {
           e.preventDefault();
           var target = e.currentTarget;
           setTimeout(() => {
             path.classList.remove("check");
-            let item = list2.removeChild(
-              target.parentElement.parentElement.parentElement
-            );
+            let item = document
+              .getElementById("v-" + tag.toLowerCase())
+              .removeChild(target.parentElement.parentElement.parentElement);
           }, 200);
         });
         path.classList.add("check");
         socket.emit("delete", e.currentTarget.id);
       }
+      socket.on("fd", (id) => {
+        let item = document.getElementById(id);
+        let tag = item.querySelector(".tag").textContent;
+        ocument.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        item.removeEventListener("click", deleteEvent);
+      });
 
       socket.on("error", (e) => {
         document.getElementById("error").textContent = e;

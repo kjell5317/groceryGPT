@@ -9,6 +9,26 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
+const categories = [
+  "Obst",
+  "Gemüse",
+  "Backen",
+  "Konserven",
+  "Aufstrich",
+  "Backware",
+  "Cerealien",
+  "Teigware",
+  "Soße",
+  "Getränke",
+  "Fleischersatz",
+  "Milchprodukte",
+  "Tiefkühl",
+  "Pflegeprodukte",
+  "Haushalt",
+  "Snacks",
+  "Fertigprodukte",
+];
+
 // open the database file
 const db = await open({
   filename: "items.db",
@@ -40,16 +60,19 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   // Fetch DB on new connect
-  db.each(
-    "SELECT * FROM items i JOIN tags t ON UPPER(i.name) = UPPER(t.name)",
-    (err, row) => {
-      if (!row.done) {
-        socket.emit("item", row.id, row.name, row.tag);
-      } else {
-        socket.emit("shift", row.id, row.name, row.tag);
+  if (!socket.recovered) {
+    db.each(
+      "SELECT * FROM items i JOIN tags t ON UPPER(i.name) = UPPER(t.name)",
+      (err, row) => {
+        console.log(row.tag);
+        if (!row.done) {
+          socket.emit("item", row.id, row.name, row.tag);
+        } else {
+          socket.emit("shift", row.id, row.name, row.tag);
+        }
       }
-    }
-  );
+    );
+  }
 
   // Add new item
   socket.on("item", async (msg) => {
@@ -66,9 +89,12 @@ io.on("connection", (socket) => {
         console.log("Asking OpenAI");
         const completion = await openai.completions.create({
           model: "gpt-3.5-turbo-instruct",
-          prompt: `Sortiere ${msg} in eine der Kateogrien "Obst, Gemüse, Haushalt, Sonstiges" ein.`,
+          prompt: `Weise ${msg} einer der Kateogrien "${categories}" zu. Antworte nur mit dem Namen einer Kategorie.`,
         });
         tag = completion.choices[0].text.replace(/[\n\r]/g, "");
+        if (!categories.includes(tag)) {
+          tag = "Sonstiges";
+        }
         await db.run("INSERT INTO tags (name, tag) VALUES (?, ?)", msg, tag);
       } catch (e) {
         io.emit("error", "Tag Zuweisung fehlgeschlagen");
@@ -86,6 +112,7 @@ io.on("connection", (socket) => {
       io.emit("error", "Hinzufügen fehlgeschlagen");
       return;
     }
+    console.log(tag);
     io.emit("item", res.lastID, msg, tag);
   });
 
@@ -97,6 +124,7 @@ io.on("connection", (socket) => {
       io.emit("error", "Abhaken fehlgeschlagen");
       return;
     }
+    socket.broadcast.emit("fs", id);
   });
 
   // Delete item
@@ -107,6 +135,7 @@ io.on("connection", (socket) => {
       io.emit("error", "Löschen fehlgeschlagen");
       return;
     }
+    socket.broadcast.emit("fd", id);
   });
 });
 
