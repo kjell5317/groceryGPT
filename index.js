@@ -87,9 +87,11 @@ io.on("connection", (socket) => {
     if (res[0]?.tag == null) {
       try {
         console.log("Asking OpenAI");
-        const completion = await openai.completions.create({
-          model: "gpt-3.5-turbo-instruct",
-          prompt: `Weise ${msg} einer der Kateogrien "${categories}" zu. Antworte nur mit dem Namen einer Kategorie.`,
+        const completion = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          prompt: `Weise ${msg} einer der Kateogrien "${categories.join(
+            ", "
+          )}" zu. Antworte nur mit dem Namen einer Kategorie.`,
         });
         tag = completion.choices[0].text.replace(/[\n\r]/g, "");
         if (!categories.includes(tag)) {

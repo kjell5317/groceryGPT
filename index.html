@@ -245,7 +245,6 @@
       });
       // Receive
       socket.on("item", (id, name, tag) => {
-        console.log(tag);
         const item = document.createElement("li");
         item.setAttribute("id", id);
         item.addEventListener("click", shiftEvent);
