@@ -1,6 +1,6 @@
 {
   "name": "groceryGPT",
-  "version": "0.2",
+  "version": "0.3",
   "slug": "grocerygpt",
   "url": "https://github.com/kjell5317/groceryGPT",
   "description": "The smart shopping list.",
@@ -22,5 +22,8 @@
     "api_key": "password",
     "categories": ["match(^\\w*$)"]
   },
-  "init": false
+  "init": false,
+  "ports": {
+    "3000/tcp": 3000
+  }
 }
