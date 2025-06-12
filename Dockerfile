@@ -13,7 +13,7 @@ COPY items.db /data
 
 COPY package.json /
 RUN cd / && npm install
-COPY server.js /
+COPY index.js /
 
 COPY run.sh /
 RUN chmod +x /run.sh
