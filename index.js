@@ -1,3 +1,7 @@
+const args = process.argv.slice(2);
+const apiKey = args[0];
+const categories = JSON.parse(args[1]);
+
 import express from "express";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
@@ -5,29 +9,10 @@ import { dirname, join } from "node:path";
 import { Server } from "socket.io";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import OpenAI from "openai";
 
-const openai = new OpenAI();
+import { GoogleGenAI } from "@google/genai";
 
-const categories = [
-  "Obst",
-  "Gemüse",
-  "Backen",
-  "Konserven",
-  "Aufstrich",
-  "Backware",
-  "Cerealien",
-  "Teigware",
-  "Soße",
-  "Getränke",
-  "Fleischersatz",
-  "Milchprodukte",
-  "Tiefkühl",
-  "Pflegeprodukte",
-  "Haushalt",
-  "Snacks",
-  "Fertigprodukte",
-];
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 // open the database file
 const db = await open({
@@ -79,7 +64,10 @@ io.on("connection", (socket) => {
     let res;
     let tag;
     try {
-      res = await db.all("SELECT tag FROM tags WHERE name = ?", msg);
+      res = await db.all(
+        "SELECT tag FROM tags WHERE UPPER(name) = UPPER(?)",
+        msg
+      );
     } catch (e) {
       io.emit("error", "Tag Abruf fehlgeschlagen");
       return;
@@ -87,13 +75,13 @@ io.on("connection", (socket) => {
     if (res[0]?.tag == null) {
       try {
         console.log("Asking OpenAI");
-        const completion = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          prompt: `Weise ${msg} einer der Kateogrien "${categories.join(
+        const response = await ai.models.generateContent({
+          model: "gemini-2.0-flash-lite",
+          contents: `Weise ${msg} einer der Kateogrien "${categories.join(
             ", "
           )}" zu. Antworte nur mit dem Namen einer Kategorie.`,
         });
-        tag = completion.choices[0].text.replace(/[\n\r]/g, "");
+        tag = response.text.replace(/[\n\r]/g, "");
         if (!categories.includes(tag)) {
           tag = "Sonstiges";
         }

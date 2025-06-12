@@ -8,10 +8,19 @@
   "startup": "application",
   "boot": "auto",
   "options": {
-    "api_key": null
+    "api_key": null,
+    "categories": [
+      "Fruits",
+      "Vegetables",
+      "Dairy",
+      "Meat",
+      "Bakery",
+      "Beverages"
+    ]
   },
   "schema": {
-    "api_key": "password"
+    "api_key": "password",
+    "categories": ["match(^\\w*$)"]
   },
   "init": false
 }
