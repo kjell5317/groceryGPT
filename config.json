@@ -1,7 +1,7 @@
 {
   "name": "groceryGPT",
-  "version": "0.1",
-  "slug": "groceryGPT",
+  "version": "0.2",
+  "slug": "grocerygpt",
   "url": "https://github.com/kjell5317/groceryGPT",
   "description": "The smart shopping list.",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
