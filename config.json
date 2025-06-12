@@ -1,0 +1,17 @@
+{
+  "name": "groceryGPT",
+  "version": "0.1",
+  "slug": "groceryGPT",
+  "url": "https://github.com/kjell5317/groceryGPT",
+  "description": "The smart shopping list.",
+  "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
+  "startup": "application",
+  "boot": "auto",
+  "options": {
+    "api_key": null
+  },
+  "schema": {
+    "api_key": "password"
+  },
+  "init": false
+}
