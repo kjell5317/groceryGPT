@@ -190,7 +190,7 @@
       socket.on("fs", (id) => {
         let item = document.getElementById(id);
         let tag = item.querySelector(".tag").textContent;
-        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        document.getElementById("s-" + tag.toLowerCase()).removeChild(item);
         item.removeEventListener("click", shiftEvent);
         item.addEventListener("click", deleteEvent);
         document.getElementById("v-" + tag.toLowerCase()).prepend(item);
@@ -203,14 +203,14 @@
           `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
         );
         let tag = e.currentTarget.querySelector(".tag").textContent;
+        let target = e.currentTarget;
         path.addEventListener("animationend", (e) => {
           e.preventDefault();
-          var target = e.currentTarget;
           setTimeout(() => {
             path.classList.remove("check");
             let item = document
               .getElementById("v-" + tag.toLowerCase())
-              .removeChild(target.parentElement.parentElement.parentElement);
+              .removeChild(target);
           }, 200);
         });
         path.classList.add("check");
@@ -219,7 +219,7 @@
       socket.on("fd", (id) => {
         let item = document.getElementById(id);
         let tag = item.querySelector(".tag").textContent;
-        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        document.getElementById("v-" + tag.toLowerCase()).removeChild(item);
         item.removeEventListener("click", deleteEvent);
       });
 
