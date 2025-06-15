@@ -8,6 +8,6 @@ CAT=$(bashio::config 'categories')
 
 bashio::log.info "Starting..."
 
-npm run build "$CAT"
+./categories.sh $CAT
 
-node ./server.js $TOKEN "$CAT"
+node ./server.js $TOKEN $CAT

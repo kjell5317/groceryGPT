@@ -1,9 +1,6 @@
 const args = process.argv.slice(2);
-const apiKey = args[0] || "AIzaSyB0qCR19TkUU1mckEax3dA7chSX6sSeovY";
-const categories = JSON.parse(
-  args[1] ||
-    '["Obst", "Gemüse", "Getränke", "Milchprodukte", "Fleisch", "Fisch", "Brot", "Snacks", "Getränke"]'
-);
+const apiKey = args[0];
+const categories = args[1].split("\\W+");
 
 import express from "express";
 import { createServer } from "node:http";
