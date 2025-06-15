@@ -1,5 +1,5 @@
 const args = process.argv.slice(2);
-const apiKey = args[0] || "AIzaSyDeEqjADAqXMClEG1t7pDmb6FHWVI3goAs";
+const apiKey = args[0] || "AIzaSyB0qCR19TkUU1mckEax3dA7chSX6sSeovY";
 const categories = JSON.parse(
   args[1] ||
     '["Obst", "Gemüse", "Getränke", "Milchprodukte", "Fleisch", "Fisch", "Brot", "Snacks", "Getränke"]'
@@ -42,7 +42,9 @@ const io = new Server(server, { connectionStateRecovery: {} });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-app.use(express.static(join(__dirname, "dist")));
+app.get("/", (req, res) => {
+  res.sendFile(join(__dirname, "index.html"));
+});
 
 io.on("connection", (socket) => {
   console.log("New client connected");

@@ -1,13 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>groceryGPT</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Einkauf</title>
+    <style></style>
   </head>
   <body>
-    <div id="root"></div>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="wrap">
+      <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Hinzufügen" />
+        <button>+</button>
+      </form>
+      <p id="error"></p>
+      <h2>Einkaufen</h2>
+      <ul id="shop"></ul>
+      <h2>Vorrat</h2>
+      <ul id="stock"></ul>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+
+      // Add new item
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit("item", input.value);
+          input.value = "";
+        }
+      });
+      // Receive
+      socket.on("item", (id, name, tag) => {
+        if (!document.getElementById("s-" + tag.toLowerCase())) {
+          let list = document.createElement("li");
+          list.innerHTML = `<ul id="s-${tag.toLowerCase()}"></ul>`;
+          document.getElementById("shop").appendChild(list);
+        }
+        const item = document.createElement("li");
+        item.setAttribute("id", id);
+        item.addEventListener("click", shiftEvent);
+        item.innerHTML = `<div class="circle">
+            <svg viewBox="0 0 24 24">
+            <path d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
+            </svg></div><span class="name">${name}</span>
+            <span class="tag">${tag}</span>`;
+        document.getElementById("s-" + tag.toLowerCase()).prepend(item);
+      });
+
+      socket.on("shift", (id, name, tag) => {
+        if (!document.getElementById("v-" + tag.toLowerCase())) {
+          let list = document.createElement("li");
+          list.innerHTML = `<ul id="v-${tag.toLowerCase()}"></ul>`;
+          document.getElementById("stock").appendChild(list);
+        }
+        item = document.createElement("li");
+        item.setAttribute("id", id);
+        item.innerHTML = `<div class="circle">
+            <svg viewBox="0 0 24 24">
+            <path d="M4.1 12.7L9 17.6 20.3 6.3" fill="none" />
+            </svg></div><span class="name">${name}</span>
+            <span class="tag">${tag}</span>`;
+        item.addEventListener("click", deleteEvent);
+        document.getElementById("v-" + tag.toLowerCase()).prepend(item);
+      });
+
+      function shiftEvent(e) {
+        e.preventDefault();
+        e.currentTarget.removeEventListener("click", shiftEvent);
+        let path = document.querySelector(
+          `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
+        );
+        let tag = e.currentTarget.querySelector(".tag").textContent;
+        path.addEventListener("animationend", function handler(e) {
+          e.preventDefault();
+          var target = e.currentTarget;
+          this.removeEventListener("animationend", handler);
+          setTimeout(() => {
+            path.classList.remove("check");
+            let item = document
+              .getElementById(tag.toLowerCase())
+              .removeChild(target.parentElement.parentElement.parentElement);
+            item.addEventListener("click", deleteEvent);
+            document.getElementById("v-" + tag.toLowerCase()).prepend(item);
+          }, 200);
+        });
+        path.classList.add("check");
+        socket.emit("shift", e.currentTarget.id);
+      }
+      socket.on("fs", (id) => {
+        let item = document.getElementById(id);
+        let tag = item.querySelector(".tag").textContent;
+        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        item.removeEventListener("click", shiftEvent);
+        item.addEventListener("click", deleteEvent);
+        document.getElementById("v-" + tag.toLowerCase()).prepend(item);
+      });
+
+      function deleteEvent(e) {
+        e.preventDefault();
+        e.currentTarget.removeEventListener("click", deleteEvent);
+        let path = document.querySelector(
+          `#\\3${[...e.currentTarget.id].join(" ")} > div > svg > path`
+        );
+        let tag = e.currentTarget.querySelector(".tag").textContent;
+        path.addEventListener("animationend", (e) => {
+          e.preventDefault();
+          var target = e.currentTarget;
+          setTimeout(() => {
+            path.classList.remove("check");
+            let item = document
+              .getElementById("v-" + tag.toLowerCase())
+              .removeChild(target.parentElement.parentElement.parentElement);
+          }, 200);
+        });
+        path.classList.add("check");
+        socket.emit("delete", e.currentTarget.id);
+      }
+      socket.on("fd", (id) => {
+        let item = document.getElementById(id);
+        let tag = item.querySelector(".tag").textContent;
+        document.getElementById(tag.toLocaleLowerCase()).removeChild(item);
+        item.removeEventListener("click", deleteEvent);
+      });
+
+      socket.on("error", (e) => {
+        document.getElementById("error").textContent = e;
+        setTimeout(() => {
+          document.getElementById("error").textContent = "";
+        }, 5000);
+      });
+    </script>
   </body>
 </html>
