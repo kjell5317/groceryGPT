@@ -10,4 +10,4 @@ bashio::log.info "Starting..."
 
 TMP=$(./categories.sh $CAT)
 
-node ./server.js $TOKEN $CAT $TMP
+node ./server.js $TOKEN $TMP $CAT
