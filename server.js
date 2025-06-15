@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
       socket.emit("error", "Adding item failed");
       return;
     }
-    socket.emit("item", res.lastID, msg, tag);
+    socket.broadcast.emit("item", res.lastID, msg, tag);
   });
 
   // Set item to bought
