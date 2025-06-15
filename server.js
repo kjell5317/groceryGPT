@@ -1,5 +1,4 @@
 const args = process.argv.slice(2);
-const apiKey = args[0];
 const categories = args[1].split("\\W+");
 
 import express from "express";
@@ -12,7 +11,7 @@ import { open } from "sqlite";
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: apiKey });
+const ai = new GoogleGenAI({ apiKey: args[0] });
 
 // open the database file
 const db = await open({
@@ -40,7 +39,7 @@ const io = new Server(server, { connectionStateRecovery: {} });
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
+  res.sendFile(join(__dirname, args[2]));
 });
 
 io.on("connection", (socket) => {
@@ -61,7 +60,6 @@ io.on("connection", (socket) => {
 
   // Add new item
   socket.on("item", async (msg) => {
-    console.log(msg);
     let res;
     let tag;
     try {

@@ -12,6 +12,7 @@ for item in "${items[@]}"; do
   lowercased_item=$(echo "$item" | tr '[:upper:]' '[:lower:]')
   SHOP_ITEMS+="<li><ul id=\"s-${lowercased_item}\"></ul></li>"
 done
+SHOP_ITEMS+="<li><ul id=\"s-other\"></ul></li>"
 
 # Generate the <li> elements to be added to ul#stock
 STOCK_ITEMS=""
@@ -19,6 +20,7 @@ for item in "${items[@]}"; do
   lowercased_item=$(echo "$item" | tr '[:upper:]' '[:lower:]')
   STOCK_ITEMS+="<li><ul id=\"v-${lowercased_item}\"></ul></li>"
 done
+STOCK_ITEMS+="<li><ul id=\"v-other\"></ul></li>"
 
 # --- AWK Script for HTML Modification ---
 awk_script='
@@ -81,12 +83,5 @@ awk -v shop_items="$SHOP_ITEMS" -v stock_items="$STOCK_ITEMS" "$awk_script" "$HT
 
 # Check if the AWK command executed successfully
 if [ $? -eq 0 ]; then
-  # If successful, move the temporary file to overwrite the original HTML file
-  mv "$TEMP_FILE" "$HTML_FILE"
-  echo "HTML file '$HTML_FILE' updated successfully."
-else
-  # If there was an error, report it and clean up the temporary file
-  echo "Error: Failed to update HTML file '$HTML_FILE'."
-  rm -f "$TEMP_FILE" # Ensure temp file is removed on error
-fi
+  echo "$TEMP_FILE"
 

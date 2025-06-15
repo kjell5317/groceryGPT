@@ -113,10 +113,18 @@
       </form>
       <p id="error"></p>
       <h2>Buy</h2>
-      <ul id="shop"></ul>
+      <ul id="shop">
+        <li><ul id="s-other"></ul></li>
+        <li><ul id="s-obst"></ul></li>
+        <li><ul id="s-gemüse"></ul></li>
+      </ul>
 
       <h2>Stock</h2>
-      <ul id="stock"></ul>
+      <ul id="stock">
+        <li><ul id="v-other"></ul></li>
+        <li><ul id="v-obst"></ul></li>
+        <li><ul id="v-gemüse"></ul></li>
+      </ul>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -136,6 +144,7 @@
       });
       // Receive
       socket.on("item", (id, name, tag) => {
+        console.log(tag);
         const item = document.createElement("li");
         item.setAttribute("id", id);
         item.addEventListener("click", shiftEvent);
@@ -148,11 +157,6 @@
       });
 
       socket.on("shift", (id, name, tag) => {
-        if (!document.getElementById("v-" + tag.toLowerCase())) {
-          let list = document.createElement("li");
-          list.innerHTML = `<ul id="v-${tag.toLowerCase()}"></ul>`;
-          document.getElementById("stock").appendChild(list);
-        }
         item = document.createElement("li");
         item.setAttribute("id", id);
         item.innerHTML = `<div class="circle">
