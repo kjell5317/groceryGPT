@@ -229,6 +229,19 @@
           document.getElementById("error").textContent = "";
         }, 5000);
       });
+      socket.on("disconnect", () => {
+        document.getElementById("error").textContent =
+          "Disconnected from server";
+        setTimeout(() => {
+          document.getElementById("error").textContent = "";
+        }, 5000);
+        const elements = document.querySelectorAll("ul>li>ul>li");
+        elements.forEach((element) => {
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
+        });
+      });
     </script>
   </body>
 </html>
