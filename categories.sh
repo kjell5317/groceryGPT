@@ -84,4 +84,4 @@ awk -v shop_items="$SHOP_ITEMS" -v stock_items="$STOCK_ITEMS" "$awk_script" "$HT
 # Check if the AWK command executed successfully
 if [ $? -eq 0 ]; then
   echo "$TEMP_FILE"
-
+fi
