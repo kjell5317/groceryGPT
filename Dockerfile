@@ -12,7 +12,7 @@ RUN apk update && \
 COPY package.json /
 RUN cd / && npm install
 
-COPY server.js index.html categories.sh run.sh /
+COPY server.js temp.html categories.sh run.sh /
 
 RUN chmod +x /run.sh /categories.sh
 
