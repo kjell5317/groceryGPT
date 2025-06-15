@@ -1,5 +1,5 @@
 const args = process.argv.slice(2);
-var categories = args.slice(2);
+var categories = args.slice(1);
 import express from "express";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
@@ -38,7 +38,7 @@ const io = new Server(server, { connectionStateRecovery: {} });
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, args[1]));
+  res.sendFile(join(__dirname, "index.html"));
 });
 
 io.on("connection", (socket) => {

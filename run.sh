@@ -8,6 +8,6 @@ CAT=$(bashio::config 'categories')
 
 bashio::log.info "Starting..."
 
-TMP=$(./categories.sh $CAT)
+./categories.sh $CAT
 
-node ./server.js $TOKEN $TMP $CAT
+node ./server.js $TOKEN $CAT

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-HTML_FILE="index.html"
-
 # Store the array items passed as arguments
 items=("$@")
 
@@ -70,18 +68,4 @@ awk_script='
 '
 
 # --- Execute AWK and Update File ---
-# Create a temporary file to store the modified HTML content
-TEMP_FILE=$(mktemp)
-
-# Execute the AWK script:
-# -v shop_items="$SHOP_ITEMS": Passes the generated SHOP_ITEMS into the AWK script as a variable.
-# -v stock_items="$STOCK_ITEMS": Passes the generated STOCK_ITEMS into the AWK script as a variable.
-# "$awk_script": Provides the AWK script content to awk.
-# "$HTML_FILE": Specifies the input HTML file.
-# > "$TEMP_FILE": Redirects the output of AWK to the temporary file.
-awk -v shop_items="$SHOP_ITEMS" -v stock_items="$STOCK_ITEMS" "$awk_script" "$HTML_FILE" > "$TEMP_FILE"
-
-# Check if the AWK command executed successfully
-if [ $? -eq 0 ]; then
-  echo "$TEMP_FILE"
-fi
+awk -v shop_items="$SHOP_ITEMS" -v stock_items="$STOCK_ITEMS" "$awk_script" "temp.html" > "index.html"
