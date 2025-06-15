@@ -23,9 +23,6 @@
         margin: 4px;
         align-items: center;
       }
-      li > ul > li:first-child {
-        margin-top: 10px;
-      }
       form {
         display: flex;
         flex-direction: row;
@@ -144,7 +141,6 @@
       });
       // Receive
       socket.on("item", (id, name, tag) => {
-        console.log(tag);
         const item = document.createElement("li");
         item.setAttribute("id", id);
         item.addEventListener("click", shiftEvent);
@@ -178,7 +174,6 @@
         var target = e.currentTarget;
         path.addEventListener("animationend", function handler(e) {
           e.preventDefault();
-          console.log(target);
           this.removeEventListener("animationend", handler);
           setTimeout(() => {
             path.classList.remove("check");
