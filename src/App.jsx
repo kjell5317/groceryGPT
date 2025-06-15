@@ -13,10 +13,10 @@ function App() {
 
   useEffect(() => {
     socket.on("item", (id, name, tag) => {
-      setShoppingItems({
-        ...shoppingItems,
+      setShoppingItems((p) => ({
+        ...p,
         [id]: { name: name, tag: tag, animate: false },
-      });
+      }));
       setCategories((prevCategories) => {
         if (!prevCategories.includes(tag)) {
           return [...prevCategories, tag];
@@ -27,7 +27,10 @@ function App() {
 
     socket.on("shift", (id, name, tag) => {
       console.log(`Received shift: ${id}, ${name}, ${tag}`);
-      setStockItems({ ...stockItems, [id]: { name, tag, animate: false } });
+      setStockItems((p) => ({
+        ...p,
+        [id]: { name: name, tag: tag, animate: false },
+      }));
       setCategories((prevCategories) => {
         if (!prevCategories.includes(tag)) {
           return [...prevCategories, tag];
@@ -38,15 +41,15 @@ function App() {
 
     socket.on("fs", (id) => {
       if (shoppingItems[id]) {
-        const { [id]: _, ...obj } = shoppingItems;
+        const { [id]: item, ...obj } = shoppingItems;
         setShoppingItems(obj);
-        setStockItems({ ...stockItems, _ });
+        setStockItems({ ...stockItems, [id]: item });
       }
     });
 
     socket.on("fd", (id) => {
       if (stockItems[id]) {
-        const { [id]: _, obj } = stockItems;
+        const { [id]: _, ...obj } = stockItems;
         setStockItems(obj);
       }
     });
@@ -89,17 +92,21 @@ function App() {
   const handleAnimationEnd = (e) => {
     e.preventDefault();
     const id = e.target.id.replace("path-", "");
+    console.log(id);
     setTimeout(() => {
       setAnimation(id, false);
       if (stockItems[id]) {
-        const { [id]: _, obj } = stockItems;
+        const { [id]: _, ...obj } = stockItems;
         setStockItems(obj);
+        console.log(`Deleting item: ${id}`, stockItems);
         socket.emit("delete", id);
       } else if (shoppingItems[id]) {
-        const { [id]: _, obj } = shoppingItems;
+        const { [id]: item, ...obj } = shoppingItems;
+        console.log(item, obj);
         setShoppingItems(obj);
-        socket.emit("shift", id);
-        setStockItems({ ...stockItems, _ });
+        //socket.emit("shift", id);
+        setStockItems((p) => ({ ...p, [id]: item }));
+        console.log(stockItems);
       }
       console.log(shoppingItems, stockItems);
     }, 200);
@@ -111,12 +118,14 @@ function App() {
       socket.emit("item", inputValue.trim());
       setInputValue("");
     }
-    setShoppingItems({
-      ...shoppingItems,
+    setShoppingItems((p) => ({
+      ...p,
       id: { name: input.value, tag: "obst", animate: false },
-    });
+    }));
     setCategories((prevCategories) => {
+      console.log(categories);
       if (!prevCategories.includes("obst")) {
+        console.log("Adding obst category");
         return [...prevCategories, "obst"];
       }
     });
@@ -167,7 +176,7 @@ function App() {
       <>
         {Object.keys(stockItems).length > 0 && (
           <>
-            <h2>Einkaufen</h2>
+            <h2>Vorrat</h2>
             <ul>
               {categories.map((category) => (
                 <li>

@@ -9,13 +9,11 @@ RUN apk update && \
     nodejs-current \
     npm
 
-COPY items.db /data
-
 COPY package.json /
 RUN cd / && npm install
-COPY index.js /
 
-COPY run.sh /
+COPY . /
+
 RUN chmod +x /run.sh
 
 CMD [ "/run.sh" ]

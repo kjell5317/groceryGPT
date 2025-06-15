@@ -1,6 +1,9 @@
 const args = process.argv.slice(2);
-const apiKey = args[0];
-const categories = JSON.parse(args[1]);
+const apiKey = args[0] || "AIzaSyDeEqjADAqXMClEG1t7pDmb6FHWVI3goAs";
+const categories = JSON.parse(
+  args[1] ||
+    '["Obst", "Gemüse", "Getränke", "Milchprodukte", "Fleisch", "Fisch", "Brot", "Snacks", "Getränke"]'
+);
 
 import express from "express";
 import { createServer } from "node:http";
@@ -39,17 +42,15 @@ const io = new Server(server, { connectionStateRecovery: {} });
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
-});
+app.use(express.static(join(__dirname, "dist")));
 
 io.on("connection", (socket) => {
+  console.log("New client connected");
   // Fetch DB on new connect
   if (!socket.recovered) {
     db.each(
       "SELECT * FROM items i JOIN tags t ON UPPER(i.name) = UPPER(t.name)",
       (err, row) => {
-        console.log(row.tag);
         if (!row.done) {
           socket.emit("item", row.id, row.name, row.tag);
         } else {
@@ -61,6 +62,7 @@ io.on("connection", (socket) => {
 
   // Add new item
   socket.on("item", async (msg) => {
+    console.log(msg);
     let res;
     let tag;
     try {
@@ -69,25 +71,29 @@ io.on("connection", (socket) => {
         msg
       );
     } catch (e) {
-      io.emit("error", "Tag Abruf fehlgeschlagen");
+      socket.emit("error", "Tag Abruf fehlgeschlagen" + JSON.stringify(e));
       return;
     }
     if (res[0]?.tag == null) {
       try {
-        console.log("Asking OpenAI");
+        console.log("Asking AI");
         const response = await ai.models.generateContent({
           model: "gemini-2.0-flash-lite",
           contents: `Weise ${msg} einer der Kateogrien "${categories.join(
             ", "
           )}" zu. Antworte nur mit dem Namen einer Kategorie.`,
         });
+        console.log(response.text);
         tag = response.text.replace(/[\n\r]/g, "");
         if (!categories.includes(tag)) {
           tag = "Sonstiges";
         }
         await db.run("INSERT INTO tags (name, tag) VALUES (?, ?)", msg, tag);
       } catch (e) {
-        io.emit("error", "Tag Zuweisung fehlgeschlagen");
+        socket.emit(
+          "error",
+          "Tag Zuweisung fehlgeschlagen" + JSON.stringify(e)
+        );
         return;
       }
     } else {
@@ -99,11 +105,10 @@ io.on("connection", (socket) => {
         msg
       );
     } catch (e) {
-      io.emit("error", "Hinzufügen fehlgeschlagen");
+      socket.emit("error", "Hinzufügen fehlgeschlagen");
       return;
     }
-    console.log(tag);
-    io.emit("item", res.lastID, msg, tag);
+    socket.emit("item", res.lastID, msg, tag);
   });
 
   // Set item to bought
@@ -111,7 +116,7 @@ io.on("connection", (socket) => {
     try {
       await db.run("UPDATE items SET done = true WHERE id = ?", id);
     } catch (e) {
-      io.emit("error", "Abhaken fehlgeschlagen");
+      socket.emit("error", "Abhaken fehlgeschlagen");
       return;
     }
     socket.broadcast.emit("fs", id);
@@ -122,7 +127,7 @@ io.on("connection", (socket) => {
     try {
       await db.run("DELETE FROM items WHERE id = ?", id);
     } catch (e) {
-      io.emit("error", "Löschen fehlgeschlagen");
+      socket.emit("error", "Löschen fehlgeschlagen");
       return;
     }
     socket.broadcast.emit("fd", id);

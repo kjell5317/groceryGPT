@@ -1,0 +1,6 @@
+*
+!src/
+!index.html
+!items.db
+!server.js
+!run.sh
