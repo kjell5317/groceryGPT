@@ -42,12 +42,12 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("New client connected");
   // Fetch DB on new connect
   if (!socket.recovered) {
     db.each(
       "SELECT * FROM items i JOIN tags t ON UPPER(i.name) = UPPER(t.name)",
       (err, row) => {
+        console.log(row.tag);
         if (!row.done) {
           socket.emit("item", row.id, row.name, row.tag);
         } else {

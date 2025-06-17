@@ -9,12 +9,8 @@
   },
   "name": "grocerygpt",
   "version": "1.0.0",
-  "main": "server.js",
-  "author": "kjell5317",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kjell5317/groceryGPT"
-  },
+  "main": "index.js",
+  "author": "",
   "license": "ISC",
   "description": "",
   "type": "module"
