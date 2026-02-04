@@ -5,7 +5,7 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "@google/genai": "^1.5.0",
-    "@modelcontextprotocol/sdk": "^1.25.2"
+    "@modelcontextprotocol/sdk": "^1.26.0"
   },
   "name": "grocerygpt",
   "version": "1.0.0",
